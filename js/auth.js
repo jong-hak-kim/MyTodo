@@ -47,9 +47,8 @@ function emailAuth() {
 // ── Google 소셜 로그인 ──
 function googleLogin() {
   const provider = new firebase.auth.GoogleAuthProvider();
-  // 매번 계정 선택 화면 표시 (여러 구글 계정 지원)
   provider.setCustomParameters({ prompt: 'select_account' });
-  auth.signInWithPopup(provider)
+  auth.signInWithRedirect(provider)
     .catch(e => showAuthError(firebaseErrMsg(e.code)));
 }
 

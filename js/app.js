@@ -232,3 +232,13 @@ function updateTodayLabel() {
   const el = document.getElementById('today-str');
   if (el) el.textContent = label;
 }
+
+auth.getRedirectResult().catch(e => console.error(e));
+
+auth.onAuthStateChanged(user => {
+  if (user) {
+    showApp(user);
+  } else {
+    showAuth();
+  }
+});
