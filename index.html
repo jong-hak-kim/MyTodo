@@ -18,6 +18,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="js/i18n.js"></script>
 </head>
 <body>
 <div class="noise"></div>
@@ -158,12 +159,14 @@
       </div>
 
       <!-- 언어 -->
-      <div class="settings-section">
-        <div class="settings-section-label" id="settings-lang-label">언어</div>
-        <div class="lang-row">
-          <button class="lang-btn active" id="lang-ko" onclick="handleLangChange('ko')">한국어</button>
-          <button class="lang-btn" id="lang-en" onclick="handleLangChange('en')">English</button>
-        </div>
+      <div class="lang-row" style="flex-wrap:wrap; gap:6px;">
+        <button class="lang-btn active" id="lang-ko" onclick="handleLangChange('ko')">한국어</button>
+        <button class="lang-btn" id="lang-en" onclick="handleLangChange('en')">English</button>
+        <button class="lang-btn" id="lang-ja" onclick="handleLangChange('ja')">日本語</button>
+        <button class="lang-btn" id="lang-zh" onclick="handleLangChange('zh')">中文</button>
+        <button class="lang-btn" id="lang-es" onclick="handleLangChange('es')">Español</button>
+        <button class="lang-btn" id="lang-fr" onclick="handleLangChange('fr')">Français</button>
+        <button class="lang-btn" id="lang-de" onclick="handleLangChange('de')">Deutsch</button>
       </div>
 
       <button class="settings-save" id="settings-save-btn" onclick="saveSettings()">저장</button>

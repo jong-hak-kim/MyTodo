@@ -217,8 +217,10 @@ function handleThemeToggle(el) {
 }
 
 function handleLangChange(lang) {
-  document.getElementById('lang-ko').classList.toggle('active', lang === 'ko');
-  document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+  ['ko','en','ja','zh','es','fr','de'].forEach(l => {
+    const btn = document.getElementById('lang-' + l);
+    if (btn) btn.classList.toggle('active', lang === l);
+  });
   applyLang(lang);
 }
 
