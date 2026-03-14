@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>할 일 목록</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/style.css" />
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+<div class="noise"></div>
+
+<!-- 로그인 화면 -->
+<div id="auth-screen">
+  <div class="auth-logo">할 일 <em>목록</em></div>
+  <p class="auth-sub">로그인하면 어떤 기기에서든 동기화됩니다</p>
+  <div class="auth-card">
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchTab('login')">로그인</button>
+      <button class="auth-tab" onclick="switchTab('signup')">회원가입</button>
+    </div>
+    <input class="auth-input" id="email-input" type="email" placeholder="이메일" />
+    <input class="auth-input" id="pw-input" type="password" placeholder="비밀번호" />
+    <input class="auth-input" id="pw-confirm" type="password" placeholder="비밀번호 확인" style="display:none;" />
+    <button class="auth-btn" id="email-btn" onclick="emailAuth()">로그인</button>
+    <p class="auth-error" id="auth-error"></p>
+    <div class="auth-divider">또는</div>
+    <button class="google-btn" onclick="googleLogin()">
+      <svg class="g-icon" viewBox="0 0 48 48">
+        <path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.2l6.8-6.8C35.7 2.3 30.2 0 24 0 14.8 0 6.9 5.4 3 13.3l7.9 6.1C12.8 13.4 17.9 9.5 24 9.5z"/>
+        <path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4 6.9-10 6.9-17z"/>
+        <path fill="#FBBC05" d="M10.9 28.6A14.6 14.6 0 0 1 9.5 24c0-1.6.3-3.1.8-4.6l-7.9-6.1A23.9 23.9 0 0 0 0 24c0 3.9.9 7.5 2.5 10.8l8.4-6.2z"/>
+        <path fill="#34A853" d="M24 48c6.2 0 11.4-2 15.2-5.5l-7.5-5.8c-2 1.4-4.6 2.2-7.7 2.2-6.1 0-11.2-4-13.1-9.3l-8.4 6.2C6.9 42.6 14.8 48 24 48z"/>
+      </svg>
+      Google로 계속하기
+    </button>
+  </div>
+</div>
+
+<!-- 앱 화면 -->
+<div id="app-screen">
+  <div class="top-bar">
+    <div>
+      <p class="eyebrow" id="today-str"></p>
+      <h1>오늘도<br /><em>잘 해낼</em> 수 있어요</h1>
+    </div>
+    <div class="user-area">
+      <div class="user-avatar" id="user-avatar"></div>
+      <button class="logout-btn" onclick="logout()">로그아웃</button>
+    </div>
+  </div>
+
+  <div class="input-card">
+    <div class="input-top">
+      <input class="main-input" id="todo-input" type="text" placeholder="새로운 할 일을 입력하세요..." />
+      <button class="add-btn" onclick="addTodo()">추가</button>
+    </div>
+    <div class="input-meta">
+      <span class="meta-label">마감일</span>
+      <input type="date" class="date-picker" id="new-date" />
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-num" id="stat-total">0</div>
+      <div class="stat-lbl">전체</div>
+    </div>
+    <div class="stat good">
+      <div class="stat-num" id="stat-done">0</div>
+      <div class="stat-lbl">완료</div>
+    </div>
+    <div class="stat danger">
+      <div class="stat-num" id="stat-overdue">0</div>
+      <div class="stat-lbl">기한 초과</div>
+    </div>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-label"><span>진행률</span><span id="prog-pct">0%</span></div>
+    <div class="progress-bar-bg"><div class="progress-bar-fill" id="prog-bar" style="width:0%"></div></div>
+  </div>
+
+  <div class="filters">
+    <button class="filter-btn active" onclick="setFilter('all',this)">전체</button>
+    <button class="filter-btn" onclick="setFilter('active',this)">진행 중</button>
+    <button class="filter-btn" onclick="setFilter('done',this)">완료</button>
+    <button class="filter-btn" onclick="setFilter('today',this)">오늘</button>
+    <button class="filter-btn" onclick="setFilter('overdue',this)">기한 초과</button>
+  </div>
+
+  <div class="section-title" id="section-lbl">모든 할 일</div>
+  <div class="todo-list" id="todo-list"><div class="loading">불러오는 중...</div></div>
+</div>
+
+<!-- JS: 설정 → 인증 → 앱 순서로 로드 -->
+<script src="js/firebase-config.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
