@@ -11,7 +11,7 @@ let _unsubscribe = null;
 
 // 날짜 헤더 설정
 const now = new Date();
-document.getElementById('today-str').textContent =
+updateTodayLabel();
   `${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일 ${KR_DAYS[now.getDay()]}요일`;
 
 // ── Firestore 실시간 구독 ──
@@ -204,25 +204,31 @@ document.getElementById('todo-input').addEventListener('keydown', e => {
   if (e.key === 'Enter') addTodo();
 });
 
-function showApp(user) {
-  document.getElementById('auth-screen').style.display = 'none';
-  document.getElementById('app-screen').style.display = 'block';
-  const av = document.getElementById('user-avatar');
-  av.innerHTML = user.photoURL
-    ? `<img src="${user.photoURL}" referrerpolicy="no-referrer" />`
-    : escHtml((user.email || '?')[0].toUpperCase());
-  startTodoListener(user.uid);
+
+// ── 설정에서 호출되는 핸들러 ──
+function handleThemeToggle(el) {
+  const theme = el.checked ? 'light' : 'dark';
+  const icon = document.getElementById('theme-icon');
+  const text = document.getElementById('theme-mode-text');
+  if (icon) icon.textContent = theme === 'light' ? '☀️' : '🌙';
+  if (text) text.textContent = theme === 'light' ? (currentLang === 'ko' ? '라이트 모드' : 'Light Mode') : (currentLang === 'ko' ? '다크 모드' : 'Dark Mode');
+  applyTheme(theme);
 }
 
-function showAuth() {
-  document.getElementById('auth-screen').style.display = '';
-  document.getElementById('app-screen').style.display = 'none';
+function handleLangChange(lang) {
+  document.getElementById('lang-ko').classList.toggle('active', lang === 'ko');
+  document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+  applyLang(lang);
 }
 
-auth.onAuthStateChanged(user => {
-  if (user) {
-    showApp(user);
-  } else {
-    showAuth();
-  }
-});
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById('settings-modal')) closeSettings();
+}
+
+function updateTodayLabel() {
+  const L = I18N[currentLang];
+  const n = new Date();
+  const label = L.todayLabel(n.getFullYear(), n.getMonth()+1, n.getDate(), L.days[n.getDay()]);
+  const el = document.getElementById('today-str');
+  if (el) el.textContent = label;
+}
