@@ -134,12 +134,13 @@ function render() {
     return true;
   });
 
+  const L = I18N[currentLang];
   const sectionLabels = {
-    all: '모든 할 일',
-    active: '진행 중인 할 일',
-    done: '완료된 할 일',
-    today: '오늘의 할 일',
-    overdue: '기한 초과 항목',
+    all: L.sectionAll,
+    active: L.sectionActive,
+    done: L.sectionDone,
+    today: L.sectionToday,
+    overdue: L.sectionOverdue,
   };
   document.getElementById('section-lbl').textContent = sectionLabels[filter] || '';
 
@@ -231,7 +232,7 @@ function handleOverlayClick(e) {
 function updateTodayLabel() {
   const L = I18N[currentLang];
   const n = new Date();
-  const label = L.todayLabel(n.getFullYear(), n.getMonth()+1, n.getDate(), L.days[n.getDay()]);
+  const label = L.todayLabel(n.getFullYear(), n.getMonth()+1, n.getDate(), n.getDay());
   const el = document.getElementById('today-str');
   if (el) el.textContent = label;
 }

@@ -31,6 +31,9 @@ function updateUIText() {
   safeAttr('pw-confirm', 'placeholder', L.passwordConfirm);
   safeText('email-btn', document.getElementById('email-btn')?.textContent === I18N['ko'].login || document.getElementById('email-btn')?.textContent === I18N['en'].login ? L.login : L.signup);
   safeText('google-btn-text', L.googleLogin);
+  // 메인 텍스트
+  safeText('hero-title', L.heroTitle);
+  safeText('hero-sub', L.heroSub);
   // 앱
   safeText('logout-btn-text', L.logout);
   safeAttr('todo-input', 'placeholder', L.addPlaceholder);
