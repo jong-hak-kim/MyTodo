@@ -233,6 +233,21 @@ function updateTodayLabel() {
   if (el) el.textContent = label;
 }
 
+function showApp(user) {
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app-screen').style.display = 'block';
+  const av = document.getElementById('user-avatar');
+  av.innerHTML = user.photoURL
+    ? `<img src="${user.photoURL}" referrerpolicy="no-referrer" />`
+    : escHtml((user.email || '?')[0].toUpperCase());
+  startTodoListener(user.uid);
+}
+
+function showAuth() {
+  document.getElementById('auth-screen').style.display = '';
+  document.getElementById('app-screen').style.display = 'none';
+}
+
 auth.getRedirectResult().catch(e => console.error(e));
 
 auth.onAuthStateChanged(user => {
