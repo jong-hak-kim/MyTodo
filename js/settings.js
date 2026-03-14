@@ -168,8 +168,11 @@ function openSettings() {
 
   // 현재 값 채우기
   document.getElementById('settings-nickname-input').value = user.displayName || '';
-  document.getElementById('settings-photo-input').value = user.photoURL || '';
-  updatePhotoPreview(user.photoURL || '');
+
+// Google 계정이면 사진 섹션 숨기기
+  const isGoogle = user.providerData.some(p => p.providerId === 'google.com');
+  const photoSection = document.getElementById('settings-photo-section');
+  if (photoSection) photoSection.style.display = isGoogle ? 'none' : 'none';
 
   // 테마 토글
   document.getElementById('theme-toggle').checked = currentTheme === 'light';
