@@ -169,11 +169,6 @@ function openSettings() {
   // 현재 값 채우기
   document.getElementById('settings-nickname-input').value = user.displayName || '';
 
-// Google 계정이면 사진 섹션 숨기기
-  const isGoogle = user.providerData.some(p => p.providerId === 'google.com');
-  const photoSection = document.getElementById('settings-photo-section');
-  if (photoSection) photoSection.style.display = isGoogle ? 'none' : 'none';
-
   // 테마 토글
   document.getElementById('theme-toggle').checked = currentTheme === 'light';
 
@@ -189,18 +184,6 @@ function openSettings() {
 
 function closeSettings() {
   document.getElementById('settings-modal').classList.remove('open');
-}
-
-// ── 프로필 사진 미리보기 ──
-function updatePhotoPreview(url) {
-  const prev = document.getElementById('photo-preview');
-  if (!prev) return;
-  if (url) {
-    prev.innerHTML = `<img src="${url}" onerror="this.parentElement.innerHTML='<span>?</span>'" referrerpolicy="no-referrer" />`;
-  } else {
-    const user = auth.currentUser;
-    prev.innerHTML = `<span>${(user?.email || '?')[0].toUpperCase()}</span>`;
-  }
 }
 
 // ── 알림 상태 업데이트 ──
@@ -238,14 +221,11 @@ async function saveSettings() {
   const user = auth.currentUser;
   if (!user) return;
 
-  const nickname = document.getElementById('settings-nickname-input').value.trim();
-  const photoURL = document.getElementById('settings-photo-input').value.trim();
-  const btn = document.getElementById('settings-save-btn');
+  const nickname = document.getElementById('settings-nickname-input').value.trim();  const btn = document.getElementById('settings-save-btn');
 
   try {
     await user.updateProfile({
       displayName: nickname || user.displayName,
-      photoURL: photoURL || user.photoURL,
     });
 
     // 아바타 업데이트
