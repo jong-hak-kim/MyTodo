@@ -41,6 +41,8 @@ body {
   background-size: 200px;
 }
 
+[data-theme="light"] .noise { display: none; }
+
 /* ── 로그인 화면 ── */
 #auth-screen {
   width: 100%; max-width: 400px;

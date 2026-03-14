@@ -1,21 +1,21 @@
 /* ── 라이트 모드 변수 ── */
 [data-theme="light"] {
-  --bg: #f5f4ef;
-  --surface: #ffffff;
+  --bg: #ffffff;
+  --surface: #f8f7f4;
   --surface2: #f0ede6;
   --border: rgba(0,0,0,0.08);
-  --border2: rgba(0,0,0,0.14);
-  --text: #1a1a18;
-  --text2: #5a5955;
-  --text3: #9c9a93;
-  --accent: #8a7340;
-  --accent2: #a09456;
-  --green: #1a7a52;
-  --green-bg: rgba(26,122,82,0.1);
-  --red: #b03030;
-  --red-bg: rgba(176,48,48,0.1);
-  --amber: #8a5e10;
-  --amber-bg: rgba(138,94,16,0.08);
+  --border2: rgba(0,0,0,0.15);
+  --text: #111110;
+  --text2: #3d3c3a;
+  --text3: #888680;
+  --accent: #6b5520;
+  --accent2: #8a7040;
+  --green: #0d6e3a;
+  --green-bg: rgba(13,110,58,0.1);
+  --red: #a82020;
+  --red-bg: rgba(168,32,32,0.1);
+  --amber: #7a5010;
+  --amber-bg: rgba(122,80,16,0.08);
 }
 
 /* ── 설정 버튼 ── */
