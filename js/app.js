@@ -248,12 +248,6 @@ function showAuth() {
   document.getElementById('app-screen').style.display = 'none';
 }
 
-auth.getRedirectResult().then(result => {
-  if (result && result.user) {
-    showApp(result.user);
-  }
-}).catch(e => console.error('redirect error:', e));
-
 auth.onAuthStateChanged(user => {
   if (user) {
     showApp(user);

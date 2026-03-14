@@ -48,7 +48,10 @@ function emailAuth() {
 function googleLogin() {
   const provider = new firebase.auth.GoogleAuthProvider();
   provider.setCustomParameters({ prompt: 'select_account' });
-  auth.signInWithRedirect(provider)
+  auth.signInWithPopup(provider)
+    .then(result => {
+      if (result.user) showApp(result.user);
+    })
     .catch(e => showAuthError(firebaseErrMsg(e.code)));
 }
 
