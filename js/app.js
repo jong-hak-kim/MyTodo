@@ -89,12 +89,13 @@ function updateDate(id, val) {
 
 // ── 날짜 표시 ──
 function getDateInfo(dateStr, done) {
-  if (!dateStr) return { cls: '', label: '날짜 없음', icon: '📅' };
+  const L = I18N[currentLang];
+  if (!dateStr) return { cls: '', label: '—', icon: '📅' };
   const d = new Date(dateStr + 'T00:00:00');
-  const label = `${d.getMonth() + 1}/${d.getDate()} (${KR_DAYS[d.getDay()]})`;
+  const label = `${d.getMonth() + 1}/${d.getDate()} (${L.days[d.getDay()]})`;
   if (done) return { cls: '', label, icon: '📅' };
-  if (dateStr < todayStr) return { cls: 'overdue', label: `기한 초과 · ${label}`, icon: '⚠️' };
-  if (dateStr === todayStr) return { cls: 'today', label: `오늘 · ${label}`, icon: '🟢' };
+  if (dateStr < todayStr) return { cls: 'overdue', label: L.overdueTag(label), icon: '⚠️' };
+  if (dateStr === todayStr) return { cls: 'today', label: L.todayTag(label), icon: '🟢' };
   return { cls: 'upcoming', label, icon: '📅' };
 }
 
@@ -213,8 +214,7 @@ function handleThemeToggle(el) {
   const icon = document.getElementById('theme-icon');
   const text = document.getElementById('theme-mode-text');
   if (icon) icon.textContent = theme === 'light' ? '☀️' : '🌙';
-  if (text) text.textContent = theme === 'light' ? (currentLang === 'ko' ? '라이트 모드' : 'Light Mode') : (currentLang === 'ko' ? '다크 모드' : 'Dark Mode');
-  applyTheme(theme);
+  if (text) text.textContent = theme === 'light' ? I18N[currentLang].themeLight : I18N[currentLang].themeDark;  applyTheme(theme);
 }
 
 function handleLangChange(lang) {

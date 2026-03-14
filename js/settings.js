@@ -86,6 +86,10 @@ function openSettings() {
 
   // 테마 토글
   document.getElementById('theme-toggle').checked = currentTheme === 'light';
+  const themeText = document.getElementById('theme-mode-text');
+  const themeIcon = document.getElementById('theme-icon');
+  if (themeText) themeText.textContent = currentTheme === 'light' ? I18N[currentLang].themeLight : I18N[currentLang].themeDark;
+  if (themeIcon) themeIcon.textContent = currentTheme === 'light' ? '☀️' : '🌙';
 
   // 알림 상태
   updateNotifStatus();
