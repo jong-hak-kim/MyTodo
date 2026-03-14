@@ -356,3 +356,20 @@ h1 em { font-style: italic; color: var(--accent); }
 /* ── 스크롤바 ── */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 99px; }
+
+[data-theme="light"] .add-btn,
+[data-theme="light"] .auth-btn,
+[data-theme="light"] .filter-btn.active,
+[data-theme="light"] .lang-btn.active,
+[data-theme="light"] .settings-save {
+  background: #5a4010;
+  border-color: #5a4010;
+  color: #ffffff;
+}
+
+[data-theme="light"] .add-btn:hover,
+[data-theme="light"] .auth-btn:hover,
+[data-theme="light"] .settings-save:hover {
+  background: #3d2a08;
+  border-color: #3d2a08;
+}
