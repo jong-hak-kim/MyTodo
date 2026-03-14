@@ -203,3 +203,11 @@ function escHtml(s) {
 document.getElementById('todo-input').addEventListener('keydown', e => {
   if (e.key === 'Enter') addTodo();
 });
+
+auth.onAuthStateChanged(user => {
+  if (user) {
+    showApp(user);
+  } else {
+    showAuth();
+  }
+});
