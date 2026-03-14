@@ -59,25 +59,6 @@ function logout() {
   auth.signOut();
 }
 
-function showApp(user) {
-  document.getElementById('auth-screen').style.display = 'none';
-  document.getElementById('app-screen').style.display = '';
-
-  // 아바타: 구글 프로필 사진 or 이메일 첫 글자
-  const av = document.getElementById('user-avatar');
-  av.innerHTML = user.photoURL
-    ? `<img src="${user.photoURL}" referrerpolicy="no-referrer" />`
-    : escHtml((user.email || '?')[0].toUpperCase());
-
-  // 투두 목록 구독 시작 (app.js)
-  startTodoListener(user.uid);
-}
-
-function showAuth() {
-  document.getElementById('auth-screen').style.display = '';
-  document.getElementById('app-screen').style.display = 'none';
-}
-
 // ── 헬퍼 ──
 function showAuthError(msg) {
   document.getElementById('auth-error').textContent = msg;
