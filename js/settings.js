@@ -31,6 +31,9 @@ function updateUIText() {
   safeAttr('pw-confirm', 'placeholder', L.passwordConfirm);
   safeText('email-btn', document.getElementById('email-btn')?.textContent === I18N['ko'].login || document.getElementById('email-btn')?.textContent === I18N['en'].login ? L.login : L.signup);
   safeText('google-btn-text', L.googleLogin);
+  safeText('tab-login', L.tabLogin);
+  safeText('tab-signup', L.tabSignup);
+  safeText('or-divider', L.orDivider);
   // 메인 텍스트
   safeText('hero-title', L.heroTitle);
   safeText('hero-sub', L.heroSub);
@@ -59,6 +62,7 @@ function updateUIText() {
   safeText('settings-theme-label', L.theme);
   safeText('settings-notif-label', L.notifications);
   safeText('settings-notif-text', L.notifEnable);
+  safeText('notif-allow-btn', L.notifAllow);
   safeText('settings-lang-label', L.language);
   safeText('settings-save-btn', L.save);
   // 날짜 헤더 재설정
@@ -140,7 +144,7 @@ async function saveSettings() {
   const user = auth.currentUser;
   if (!user) return;
 
-  const nickname = document.getElementById('settings-nickname-input').value.trim();  const btn = document.getElementById('settings-save-btn');
+  const nickname = document.getElementById('settings-nickname-input').value.trim(); const btn = document.getElementById('settings-save-btn');
 
   try {
     await user.updateProfile({

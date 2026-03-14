@@ -11,7 +11,7 @@ function switchTab(mode) {
     t.classList.toggle('active', i === (mode === 'login' ? 0 : 1))
   );
   document.getElementById('pw-confirm').style.display = mode === 'signup' ? '' : 'none';
-  document.getElementById('email-btn').textContent = mode === 'login' ? '로그인' : '가입하기';
+  document.getElementById('email-btn').textContent = mode === 'login' ? I18N[currentLang].login : I18N[currentLang].signup;
   clearAuthError();
 }
 
