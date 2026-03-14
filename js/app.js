@@ -206,7 +206,7 @@ document.getElementById('todo-input').addEventListener('keydown', e => {
 
 function showApp(user) {
   document.getElementById('auth-screen').style.display = 'none';
-  document.getElementById('app-screen').style.display = '';
+  document.getElementById('app-screen').style.display = 'block';
   const av = document.getElementById('user-avatar');
   av.innerHTML = user.photoURL
     ? `<img src="${user.photoURL}" referrerpolicy="no-referrer" />`
@@ -216,7 +216,7 @@ function showApp(user) {
 
 function showAuth() {
   document.getElementById('auth-screen').style.display = '';
-  document.getElementById('app-screen').style.display = 'block';
+  document.getElementById('app-screen').style.display = 'none';
 }
 
 auth.onAuthStateChanged(user => {
