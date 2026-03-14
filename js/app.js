@@ -216,7 +216,7 @@ function showApp(user) {
 
 function showAuth() {
   document.getElementById('auth-screen').style.display = '';
-  document.getElementById('app-screen').style.display = 'none';
+  document.getElementById('app-screen').style.display = 'block';
 }
 
 auth.onAuthStateChanged(user => {
