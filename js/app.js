@@ -204,6 +204,21 @@ document.getElementById('todo-input').addEventListener('keydown', e => {
   if (e.key === 'Enter') addTodo();
 });
 
+function showApp(user) {
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app-screen').style.display = '';
+  const av = document.getElementById('user-avatar');
+  av.innerHTML = user.photoURL
+    ? `<img src="${user.photoURL}" referrerpolicy="no-referrer" />`
+    : escHtml((user.email || '?')[0].toUpperCase());
+  startTodoListener(user.uid);
+}
+
+function showAuth() {
+  document.getElementById('auth-screen').style.display = '';
+  document.getElementById('app-screen').style.display = 'none';
+}
+
 auth.onAuthStateChanged(user => {
   if (user) {
     showApp(user);
