@@ -362,14 +362,14 @@ h1 em { font-style: italic; color: var(--accent); }
 [data-theme="light"] .filter-btn.active,
 [data-theme="light"] .lang-btn.active,
 [data-theme="light"] .settings-save {
-  background: #5a4010;
-  border-color: #5a4010;
+  background: #8a7040;
+  border-color: #8a7040;
   color: #ffffff;
 }
 
 [data-theme="light"] .add-btn:hover,
 [data-theme="light"] .auth-btn:hover,
 [data-theme="light"] .settings-save:hover {
-  background: #3d2a08;
-  border-color: #3d2a08;
+  background: #6e5830;
+  border-color: #6e5830;
 }
