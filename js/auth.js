@@ -59,15 +59,6 @@ function logout() {
   auth.signOut();
 }
 
-// ── 인증 상태 변경 감지 ──
-auth.onAuthStateChanged(user => {
-  if (user) {
-    showApp(user);
-  } else {
-    showAuth();
-  }
-});
-
 function showApp(user) {
   document.getElementById('auth-screen').style.display = 'none';
   document.getElementById('app-screen').style.display = '';
