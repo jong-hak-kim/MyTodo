@@ -36,7 +36,8 @@ function emailAuth() {
 
   if (authMode === 'signup') {
     if (pw !== pw2) { showAuthError('비밀번호가 일치하지 않습니다.'); return; }
-    if (pw.length < 6) { showAuthError('비밀번호는 6자 이상이어야 합니다.'); return; }
+    if (pw.length < 8) { showAuthError('비밀번호는 8자 이상이어야 합니다.'); return; }
+    if (!/\d/.test(pw)) { showAuthError('비밀번호에 숫자를 포함해주세요.'); return; }
     auth.createUserWithEmailAndPassword(email, pw)
       .then(result => {
         result.user.sendEmailVerification();
