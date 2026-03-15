@@ -4,7 +4,7 @@
 
 const KR_DAYS = ['일', '월', '화', '수', '목', '금', '토'];
 const today = new Date();
-const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
 let todos = [];
 let filter = 'all';
@@ -13,7 +13,7 @@ let _unsubscribe = null;
 // 날짜 헤더 설정
 const now = new Date();
 updateTodayLabel();
-  `${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일 ${KR_DAYS[now.getDay()]}요일`;
+`${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일 ${KR_DAYS[now.getDay()]}요일`;
 
 // ── Firestore 실시간 구독 ──
 function startTodoListener(uid) {
@@ -214,11 +214,11 @@ function handleThemeToggle(el) {
   const icon = document.getElementById('theme-icon');
   const text = document.getElementById('theme-mode-text');
   if (icon) icon.textContent = theme === 'light' ? '☀️' : '🌙';
-  if (text) text.textContent = theme === 'light' ? I18N[currentLang].themeLight : I18N[currentLang].themeDark;  applyTheme(theme);
+  if (text) text.textContent = theme === 'light' ? I18N[currentLang].themeLight : I18N[currentLang].themeDark; applyTheme(theme);
 }
 
 function handleLangChange(lang) {
-  ['ko','en','ja','zh','es','fr','de'].forEach(l => {
+  ['ko', 'en', 'ja', 'zh', 'es', 'fr', 'de'].forEach(l => {
     const btn = document.getElementById('lang-' + l);
     if (btn) btn.classList.toggle('active', lang === l);
   });
@@ -232,12 +232,17 @@ function handleOverlayClick(e) {
 function updateTodayLabel() {
   const L = I18N[currentLang];
   const n = new Date();
-  const label = L.todayLabel(n.getFullYear(), n.getMonth()+1, n.getDate(), n.getDay());
+  const label = L.todayLabel(n.getFullYear(), n.getMonth() + 1, n.getDate(), n.getDay());
   const el = document.getElementById('today-str');
   if (el) el.textContent = label;
 }
 
 function showApp(user) {
+  if (!user.emailVerified && user.providerData[0].providerId === 'password') {
+    showAuthError('이메일 인증이 필요합니다. 메일함을 확인해주세요! 📧');
+    auth.signOut();
+    return;
+  }
   document.getElementById('auth-screen').style.display = 'none';
   document.getElementById('app-screen').style.display = 'block';
   const av = document.getElementById('user-avatar');

@@ -37,6 +37,11 @@ function emailAuth() {
     if (pw !== pw2) { showAuthError('비밀번호가 일치하지 않습니다.'); return; }
     if (pw.length < 6) { showAuthError('비밀번호는 6자 이상이어야 합니다.'); return; }
     auth.createUserWithEmailAndPassword(email, pw)
+      .then(result => {
+        result.user.sendEmailVerification();
+        auth.signOut();
+        showAuthError('인증 메일을 발송했습니다. 메일함을 확인해주세요! 📧');
+      })
       .catch(e => showAuthError(firebaseErrMsg(e.code)));
   } else {
     auth.signInWithEmailAndPassword(email, pw)
