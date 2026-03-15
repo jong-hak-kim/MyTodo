@@ -103,6 +103,8 @@ function resendVerification() {
 
   const now = Date.now();
   if (now - lastVerifySentTime < COOLDOWN) {
+    const left = Math.ceil((COOLDOWN - (now - lastVerifySentTime)) / 1000);
+    showAuthError(`${left}초 후에 다시 시도해주세요.`);
     const btn = document.getElementById('resend-verify-btn');
     btn.disabled = true;
     const timer = setInterval(() => {
