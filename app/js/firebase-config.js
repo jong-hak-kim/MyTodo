@@ -30,11 +30,11 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 
-const appCheck = firebase.appCheck();
-appCheck.activate(
-  new firebase.appCheck.ReCaptchaV3Provider('6Ldo-IosAAAAAGvWG6Ztu2q_Jf40-m3rTojGPKHm'),
-  true
-);
+// const appCheck = firebase.appCheck();
+// appCheck.activate(
+//   new firebase.appCheck.ReCaptchaV3Provider('6Ldo-IosAAAAAGvWG6Ztu2q_Jf40-m3rTojGPKHm'),
+//   true
+// );
 
 // 전역 인스턴스 — auth.js, app.js에서 사용
 const auth = firebase.auth();
