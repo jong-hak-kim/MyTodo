@@ -237,7 +237,8 @@ function updateTodayLabel() {
   if (el) el.textContent = label;
 }
 
-function showApp(user) {
+async function showApp(user) {
+  await user.reload();
   if (!user.emailVerified && user.providerData[0].providerId === 'password') {
     showAuthError('이메일 인증이 필요합니다. 메일함을 확인해주세요! 📧');
     document.getElementById('resend-verify-btn').style.display = 'inline-block';
