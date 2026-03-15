@@ -240,8 +240,10 @@ function updateTodayLabel() {
 let pendingVerificationUser = null;
 
 async function showApp(user) {
+  if (!user) return;
   await user.reload();
   const freshUser = auth.currentUser;
+  if (!freshUser) return;
   if (!freshUser.emailVerified && freshUser.providerData[0].providerId === 'password') {
     const createdAt = new Date(freshUser.metadata.creationTime).getTime();
     const hoursPassed = (Date.now() - createdAt) / (1000 * 60 * 60);
@@ -273,6 +275,10 @@ async function showApp(user) {
 function showAuth() {
   document.getElementById('auth-screen').style.display = '';
   document.getElementById('app-screen').style.display = 'none';
+  // pendingVerificationUser가 있으면 재발송 버튼 유지
+  if (!pendingVerificationUser) {
+    document.getElementById('resend-verify-btn').style.display = 'none';
+  }
 }
 
 auth.onAuthStateChanged(async user => {
