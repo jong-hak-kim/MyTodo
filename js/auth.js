@@ -12,6 +12,7 @@ function switchTab(mode) {
   );
   document.getElementById('pw-confirm').style.display = mode === 'signup' ? '' : 'none';
   document.getElementById('email-btn').textContent = mode === 'login' ? I18N[currentLang].login : I18N[currentLang].signup;
+  document.getElementById('forgot-pw-btn').style.display = mode === 'login' ? 'inline-block' : 'none';
   clearAuthError();
 }
 
