@@ -98,8 +98,8 @@ function resetPassword() {
 let lastVerifySentTime = 0;
 
 function resendVerification() {
-  const user = auth.currentUser;
-  if (!user) return;
+  const user = pendingVerificationUser || auth.currentUser;
+  if (!user) { showAuthError('다시 로그인 후 시도해주세요.'); return; }
 
   const now = Date.now();
   if (now - lastVerifySentTime < COOLDOWN) {

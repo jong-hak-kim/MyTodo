@@ -237,22 +237,37 @@ function updateTodayLabel() {
   if (el) el.textContent = label;
 }
 
+let pendingVerificationUser = null;
+
 async function showApp(user) {
   await user.reload();
-  if (!user.emailVerified && user.providerData[0].providerId === 'password') {
+  const freshUser = auth.currentUser;
+  if (!freshUser.emailVerified && freshUser.providerData[0].providerId === 'password') {
+    const createdAt = new Date(freshUser.metadata.creationTime).getTime();
+    const hoursPassed = (Date.now() - createdAt) / (1000 * 60 * 60);
+    if (hoursPassed > 24) {
+      freshUser.delete().then(() => {
+        showAuthError('인증 기간(24시간)이 만료되어 계정이 삭제되었습니다. 다시 가입해주세요.');
+      }).catch(() => {
+        showAuthError('인증 기간이 만료되었습니다. 다시 가입해주세요.');
+      });
+      return;
+    }
+    pendingVerificationUser = freshUser;
     showAuthError('이메일 인증이 필요합니다. 메일함을 확인해주세요! 📧');
     document.getElementById('resend-verify-btn').style.display = 'inline-block';
-    auth.signOut();
+    await auth.signOut();
     return;
   }
+  pendingVerificationUser = null;
   document.getElementById('resend-verify-btn').style.display = 'none';
   document.getElementById('auth-screen').style.display = 'none';
   document.getElementById('app-screen').style.display = 'block';
   const av = document.getElementById('user-avatar');
-  av.innerHTML = user.photoURL
-    ? `<img src="${user.photoURL}" referrerpolicy="no-referrer" />`
-    : escHtml((user.email || '?')[0].toUpperCase());
-  startTodoListener(user.uid);
+  av.innerHTML = freshUser.photoURL
+    ? `<img src="${freshUser.photoURL}" referrerpolicy="no-referrer" />`
+    : escHtml((freshUser.email || '?')[0].toUpperCase());
+  startTodoListener(freshUser.uid);
 }
 
 function showAuth() {
