@@ -60,21 +60,47 @@ function googleLogin() {
     .catch(e => showAuthError(firebaseErrMsg(e.code)));
 }
 
+let lastSentTime = 0;
+const COOLDOWN = 60000; // 60초 쿨다운
+
 function resetPassword() {
   const email = document.getElementById('email-input').value.trim();
   if (!email) { showAuthError('이메일을 입력하세요.'); return; }
+
+  const now = Date.now();
+  if (now - lastSentTime < COOLDOWN) {
+    const left = Math.ceil((COOLDOWN - (now - lastSentTime)) / 1000);
+    showAuthError(`${left}초 후에 다시 시도해주세요.`);
+    return;
+  }
+
   auth.sendPasswordResetEmail(email)
-    .then(() => showAuthError('비밀번호 재설정 메일을 발송했습니다 📧'))
+    .then(() => {
+      lastSentTime = Date.now();
+      showAuthError('비밀번호 재설정 메일을 발송했습니다 📧');
+    })
     .catch(e => showAuthError(firebaseErrMsg(e.code)));
 }
 
+let lastVerifySentTime = 0;
+
 function resendVerification() {
   const user = auth.currentUser;
-  if (user) {
-    user.sendEmailVerification()
-      .then(() => showAuthError('인증 메일을 재발송했습니다 📧'))
-      .catch(e => showAuthError(firebaseErrMsg(e.code)));
+  if (!user) return;
+
+  const now = Date.now();
+  if (now - lastVerifySentTime < COOLDOWN) {
+    const left = Math.ceil((COOLDOWN - (now - lastVerifySentTime)) / 1000);
+    showAuthError(`${left}초 후에 다시 시도해주세요.`);
+    return;
   }
+
+  user.sendEmailVerification()
+    .then(() => {
+      lastVerifySentTime = Date.now();
+      showAuthError('인증 메일을 재발송했습니다 📧');
+    })
+    .catch(e => showAuthError(firebaseErrMsg(e.code)));
 }
 
 // ── 로그아웃 ──
