@@ -256,9 +256,10 @@ async function showApp(user) {
       return;
     }
     pendingVerificationUser = freshUser;
+    await auth.signOut();
+    // signOut 후 showAuth가 호출되고 나서 버튼을 보여줌
     showAuthError('이메일 인증이 필요합니다. 메일함을 확인해주세요! 📧');
     document.getElementById('resend-verify-btn').style.display = 'inline-block';
-    await auth.signOut();
     return;
   }
   pendingVerificationUser = null;
