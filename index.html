@@ -1,207 +1,703 @@
 <!DOCTYPE html>
 <html lang="ko">
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-JNEB6PTY98"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag() { dataLayer.push(arguments); }
-  gtag('js', new Date());
-  gtag('config', 'G-JNEB6PTY98');
-</script>
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="google-site-verification" content="GKrx9Gv17d18r6PZ9RisMMWeJaPYJkbL3mXCYY0Q4X4" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>할 일 목록</title>
+  <title>ClearToDoDay — 하루를 깔끔하게 비우는 할 일 관리</title>
+  <meta name="description"
+    content="ClearToDoDay는 심플하고 강력한 할 일 관리 앱입니다. 어떤 기기에서든 동기화되고, 마감일 관리, 다국어 지원까지 갖춘 무료 서비스입니다." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link
     href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&display=swap"
     rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css" />
-  <link rel="stylesheet" href="css/settings.css" />
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
-  <script src="js/i18n.js"></script>
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #0f0f0e;
+      --surface: #1a1a18;
+      --surface2: #222220;
+      --border: rgba(255, 255, 255, 0.08);
+      --border2: rgba(255, 255, 255, 0.14);
+      --text: #f0ede6;
+      --text2: #9c9a93;
+      --text3: #5a5955;
+      --accent: #c9b97a;
+      --accent2: #a09456;
+      --green: #4db88a;
+      --red: #e05a5a;
+    }
+
+    html {
+      font-size: 16px;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Noto Sans KR', sans-serif;
+      font-weight: 400;
+      line-height: 1.7;
+    }
+
+    /* 노이즈 텍스처 */
+    .noise {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.025;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 200px;
+    }
+
+    /* 네비게이션 */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding: 1.2rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(15, 15, 14, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-logo {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.3rem;
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    .nav-logo em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      align-items: center;
+    }
+
+    .nav-links a {
+      color: var(--text3);
+      text-decoration: none;
+      font-size: 14px;
+      transition: color 0.15s;
+    }
+
+    .nav-links a:hover {
+      color: var(--text2);
+    }
+
+    .nav-cta {
+      padding: 8px 20px;
+      border-radius: 99px;
+      border: 1px solid var(--accent2);
+      background: transparent;
+      color: var(--accent);
+      font-size: 14px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.15s;
+      font-family: 'Noto Sans KR', sans-serif;
+    }
+
+    .nav-cta:hover {
+      background: var(--accent2);
+      color: #0f0f0e;
+    }
+
+    /* 히어로 섹션 */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 8rem 2rem 4rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-eyebrow {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .hero-eyebrow::before,
+    .hero-eyebrow::after {
+      content: '';
+      width: 30px;
+      height: 1px;
+      background: var(--accent2);
+    }
+
+    .hero h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(2.8rem, 7vw, 5rem);
+      font-weight: 400;
+      line-height: 1.1;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero h1 em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .hero p {
+      font-size: clamp(1rem, 2vw, 1.15rem);
+      color: var(--text2);
+      max-width: 520px;
+      margin: 0 auto 2.5rem;
+      font-weight: 300;
+    }
+
+    .hero-btns {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      padding: 14px 32px;
+      border-radius: 99px;
+      background: var(--accent);
+      border: none;
+      color: #0f0f0e;
+      font-size: 15px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s;
+      font-family: 'Noto Sans KR', sans-serif;
+    }
+
+    .btn-primary:hover {
+      background: #d4c688;
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      padding: 14px 32px;
+      border-radius: 99px;
+      border: 1px solid var(--border2);
+      background: transparent;
+      color: var(--text2);
+      font-size: 15px;
+      text-decoration: none;
+      transition: all 0.2s;
+      font-family: 'Noto Sans KR', sans-serif;
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--accent2);
+      color: var(--accent);
+    }
+
+    /* 앱 미리보기 */
+    .preview {
+      margin-top: 4rem;
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 20px;
+      padding: 24px;
+      max-width: 400px;
+      width: 100%;
+      text-align: left;
+      animation: float 4s ease-in-out infinite;
+    }
+
+    @keyframes float {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-8px);
+      }
+    }
+
+    .preview-header {
+      margin-bottom: 20px;
+    }
+
+    .preview-date {
+      font-size: 11px;
+      color: var(--accent);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .preview-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.6rem;
+      line-height: 1.2;
+      margin-top: 4px;
+    }
+
+    .preview-title em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .preview-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .preview-stat {
+      background: var(--surface2);
+      border-radius: 10px;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .preview-stat-num {
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .preview-stat-lbl {
+      font-size: 10px;
+      color: var(--text3);
+      margin-top: 2px;
+    }
+
+    .preview-stat.green .preview-stat-num {
+      color: var(--green);
+    }
+
+    .preview-stat.red .preview-stat-num {
+      color: var(--red);
+    }
+
+    .preview-items {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .preview-item {
+      background: var(--surface2);
+      border-radius: 10px;
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .preview-item.done {
+      opacity: 0.4;
+    }
+
+    .preview-cb {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 1.5px solid var(--border2);
+      flex-shrink: 0;
+    }
+
+    .preview-cb.checked {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .preview-item-text {
+      font-size: 13px;
+      flex: 1;
+    }
+
+    .preview-item.done .preview-item-text {
+      text-decoration: line-through;
+      color: var(--text3);
+    }
+
+    .preview-tag {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 99px;
+      background: rgba(77, 184, 138, 0.12);
+      color: var(--green);
+      border: 1px solid rgba(77, 184, 138, 0.25);
+    }
+
+    .preview-tag.overdue {
+      background: rgba(224, 90, 90, 0.12);
+      color: var(--red);
+      border-color: rgba(224, 90, 90, 0.25);
+    }
+
+    /* 기능 섹션 */
+    .features {
+      padding: 6rem 2rem;
+      max-width: 1100px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+
+    .section-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(2rem, 4vw, 2.8rem);
+      font-weight: 400;
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+
+    .section-title em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .section-sub {
+      text-align: center;
+      color: var(--text2);
+      font-size: 15px;
+      font-weight: 300;
+      max-width: 480px;
+      margin: 0 auto 4rem;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    .feature-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .feature-card:hover {
+      border-color: var(--border2);
+      transform: translateY(-3px);
+    }
+
+    .feature-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: rgba(201, 185, 122, 0.1);
+      border: 1px solid rgba(201, 185, 122, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      margin-bottom: 16px;
+    }
+
+    .feature-card h3 {
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+
+    .feature-card p {
+      font-size: 14px;
+      color: var(--text2);
+      font-weight: 300;
+      line-height: 1.6;
+    }
+
+    /* 언어 섹션 */
+    .languages {
+      padding: 4rem 2rem;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+      border-top: 1px solid var(--border);
+    }
+
+    .lang-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 2rem;
+    }
+
+    .lang-chip {
+      padding: 8px 20px;
+      border-radius: 99px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      font-size: 13px;
+      color: var(--text2);
+    }
+
+    /* CTA 섹션 */
+    .cta-section {
+      padding: 8rem 2rem;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .cta-section h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 400;
+      margin-bottom: 1.5rem;
+    }
+
+    .cta-section h2 em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .cta-section p {
+      color: var(--text2);
+      font-weight: 300;
+      margin-bottom: 2.5rem;
+      font-size: 15px;
+    }
+
+    /* 푸터 */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .footer-logo {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.1rem;
+      color: var(--text2);
+      text-decoration: none;
+    }
+
+    .footer-logo em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 1.5rem;
+    }
+
+    .footer-links a {
+      color: var(--text3);
+      text-decoration: none;
+      font-size: 13px;
+      transition: color 0.15s;
+    }
+
+    .footer-links a:hover {
+      color: var(--text2);
+    }
+
+    .footer-copy {
+      font-size: 12px;
+      color: var(--text3);
+      width: 100%;
+      text-align: center;
+      margin-top: 8px;
+    }
+
+    /* 반응형 */
+    @media (max-width: 600px) {
+      nav {
+        padding: 1rem;
+      }
+
+      .nav-links {
+        gap: 1rem;
+      }
+
+      footer {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
 </head>
 
 <body>
   <div class="noise"></div>
 
-  <!-- 로그인 화면 -->
-  <div id="auth-screen">
-    <div class="auth-logo"><span id="auth-logo-text">할 일 목록</span></div>
-    <p class="auth-sub" id="auth-sub-text">로그인하면 어떤 기기에서든 동기화됩니다</p>
-    <div class="auth-card">
-      <div class="auth-tabs">
-        <button class="auth-tab active" onclick="switchTab('login')" id="tab-login">로그인</button>
-        <button class="auth-tab" onclick="switchTab('signup')" id="tab-signup">회원가입</button>
-      </div>
-      <input class="auth-input" id="email-input" type="email" placeholder="이메일" />
-      <input class="auth-input" id="pw-input" type="password" placeholder="비밀번호" />
-      <input class="auth-input" id="pw-confirm" type="password" placeholder="비밀번호 확인" style="display:none;" />
-      <button class="auth-btn" id="email-btn" onclick="emailAuth()">로그인</button>
-      <div style="display:flex; justify-content:space-between; margin-top:8px;">
-        <button class="auth-link-btn" id="forgot-pw-btn" onclick="resetPassword()">비밀번호 찾기</button>
-        <button class="auth-link-btn" id="resend-verify-btn" onclick="resendVerification()" style="display:none;">인증 메일
-          재발송</button>
-      </div>
-      <p class="auth-error" id="auth-error"></p>
-      <!-- 또는 -->
-      <div class="auth-divider" id="or-divider">또는</div>
-
-      <button class="google-btn" onclick="googleLogin()">
-        <svg class="g-icon" viewBox="0 0 48 48">
-          <path fill="#EA4335"
-            d="M24 9.5c3.5 0 6.6 1.2 9.1 3.2l6.8-6.8C35.7 2.3 30.2 0 24 0 14.8 0 6.9 5.4 3 13.3l7.9 6.1C12.8 13.4 17.9 9.5 24 9.5z" />
-          <path fill="#4285F4"
-            d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4 6.9-10 6.9-17z" />
-          <path fill="#FBBC05"
-            d="M10.9 28.6A14.6 14.6 0 0 1 9.5 24c0-1.6.3-3.1.8-4.6l-7.9-6.1A23.9 23.9 0 0 0 0 24c0 3.9.9 7.5 2.5 10.8l8.4-6.2z" />
-          <path fill="#34A853"
-            d="M24 48c6.2 0 11.4-2 15.2-5.5l-7.5-5.8c-2 1.4-4.6 2.2-7.7 2.2-6.1 0-11.2-4-13.1-9.3l-8.4 6.2C6.9 42.6 14.8 48 24 48z" />
-        </svg>
-        <span id="google-btn-text">Google로 계속하기</span>
-      </button>
+  <!-- 네비게이션 -->
+  <nav>
+    <a href="/" class="nav-logo">Clear<em>ToDoDay</em></a>
+    <div class="nav-links">
+      <a href="#features">기능</a>
+      <a href="#languages">언어</a>
+      <a href="privacy.html">개인정보처리방침</a>
+      <a href="MyTodo/" class="nav-cta">시작하기 →</a>
     </div>
-  </div>
+  </nav>
 
-  <!-- 앱 화면 -->
-  <div id="app-screen">
-    <div class="top-bar">
-      <div>
-        <p class="eyebrow" id="today-str"></p>
-        <h1><span id="hero-title">오늘도</span><br /><em id="hero-sub">잘 해낼 수 있어요</em></h1>
-      </div>
-      <div class="user-area">
-        <button class="settings-btn" onclick="openSettings()" title="설정">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-            stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="3" />
-            <path
-              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
-          </svg>
-        </button>
-        <div class="user-avatar" id="user-avatar"></div>
-        <button class="logout-btn" onclick="logout()"><span id="logout-btn-text">로그아웃</span></button>
-      </div>
+  <!-- 히어로 -->
+  <section class="hero">
+    <p class="hero-eyebrow">무료 할 일 관리 앱</p>
+    <h1>하루를<br /><em>깔끔하게</em> 비우세요</h1>
+    <p>심플하고 강력한 할 일 관리. 어떤 기기에서든 동기화되고, 마감일을 놓치지 않게 도와드립니다.</p>
+    <div class="hero-btns">
+      <a href="MyTodo/" class="btn-primary">무료로 시작하기</a>
+      <a href="#features" class="btn-secondary">기능 살펴보기</a>
     </div>
 
-    <div class="input-card">
-      <div class="input-top">
-        <input class="main-input" id="todo-input" type="text" placeholder="새로운 할 일을 입력하세요..." />
-        <button class="add-btn" onclick="addTodo()"><span id="add-btn-text">추가</span></button>
+    <!-- 앱 미리보기 -->
+    <div class="preview">
+      <div class="preview-header">
+        <div class="preview-date">2026년 3월 15일 일요일</div>
+        <div class="preview-title">오늘도<br /><em>잘 해낼</em> 수 있어요</div>
       </div>
-      <div class="input-meta">
-        <span class="meta-label" id="deadline-label">마감일</span>
-        <input type="date" class="date-picker" id="new-date" />
-      </div>
-    </div>
-
-    <div class="stats">
-      <div class="stat">
-        <div class="stat-num" id="stat-total">0</div>
-        <div class="stat-lbl" id="stat-lbl-total">전체</div>
-      </div>
-      <div class="stat good">
-        <div class="stat-num" id="stat-done">0</div>
-        <div class="stat-lbl" id="stat-lbl-done">완료</div>
-      </div>
-      <div class="stat danger">
-        <div class="stat-num" id="stat-overdue">0</div>
-        <div class="stat-lbl" id="stat-lbl-overdue">기한 초과</div>
-      </div>
-    </div>
-
-    <div class="progress-wrap">
-      <div class="progress-label">
-        <span id="progress-label-text">진행률</span>
-        <span id="prog-pct">0%</span>
-      </div>
-      <div class="progress-bar-bg">
-        <div class="progress-bar-fill" id="prog-bar" style="width:0%"></div>
-      </div>
-    </div>
-
-    <div class="filters">
-      <button class="filter-btn active" id="filter-all" onclick="setFilter('all',this)">전체</button>
-      <button class="filter-btn" id="filter-active" onclick="setFilter('active',this)">진행 중</button>
-      <button class="filter-btn" id="filter-done" onclick="setFilter('done',this)">완료</button>
-      <button class="filter-btn" id="filter-today" onclick="setFilter('today',this)">오늘</button>
-      <button class="filter-btn" id="filter-overdue" onclick="setFilter('overdue',this)">기한 초과</button>
-    </div>
-
-    <div class="section-title" id="section-lbl">모든 할 일</div>
-    <div class="todo-list" id="todo-list">
-      <div class="loading">불러오는 중...</div>
-    </div>
-  </div>
-
-  <!-- 설정 모달 -->
-  <div class="settings-overlay" id="settings-modal" onclick="handleOverlayClick(event)">
-    <div class="settings-panel">
-      <div class="settings-header">
-        <span class="settings-header-title" id="settings-title">개인설정</span>
-        <button class="settings-close-btn" onclick="closeSettings()"><span id="settings-close-text">닫기</span></button>
-      </div>
-      <div class="settings-divider"></div>
-      <div class="settings-body">
-
-        <!-- 닉네임 -->
-        <div class="settings-section">
-          <div class="settings-section-label" id="settings-nickname-label">닉네임</div>
-          <input class="settings-input" id="settings-nickname-input" type="text" placeholder="표시될 이름을 입력하세요" />
+      <div class="preview-stats">
+        <div class="preview-stat">
+          <div class="preview-stat-num">5</div>
+          <div class="preview-stat-lbl">전체</div>
         </div>
-
-        <!-- 테마 -->
-        <div class="settings-section">
-          <div class="settings-section-label" id="settings-theme-label">테마</div>
-          <div class="theme-row">
-            <div class="theme-label-wrap">
-              <span class="theme-icon" id="theme-icon">🌙</span>
-              <span id="theme-mode-text">다크 모드</span>
-            </div>
-            <label class="toggle-switch">
-              <input type="checkbox" id="theme-toggle" onchange="handleThemeToggle(this)" />
-              <span class="toggle-slider"></span>
-            </label>
-          </div>
+        <div class="preview-stat green">
+          <div class="preview-stat-num">3</div>
+          <div class="preview-stat-lbl">완료</div>
         </div>
-
-        <!-- 알림 -->
-        <div class="settings-section">
-          <div class="settings-section-label" id="settings-notif-label">알림</div>
-          <div class="notif-row">
-            <div class="notif-left">
-              <span class="notif-text" id="settings-notif-text">마감일 알림 받기</span>
-              <span class="notif-status" id="notif-status"></span>
-            </div>
-            <!-- 허용 버튼 -->
-            <button class="notif-btn" id="notif-allow-btn" onclick="requestNotifications()">허용</button>
-          </div>
+        <div class="preview-stat red">
+          <div class="preview-stat-num">1</div>
+          <div class="preview-stat-lbl">기한 초과</div>
         </div>
-
-        <!-- 언어 -->
-        <div class="lang-row" style="flex-wrap:wrap; gap:6px;">
-          <button class="lang-btn active" id="lang-ko" onclick="handleLangChange('ko')">한국어</button>
-          <button class="lang-btn" id="lang-en" onclick="handleLangChange('en')">English</button>
-          <button class="lang-btn" id="lang-ja" onclick="handleLangChange('ja')">日本語</button>
-          <button class="lang-btn" id="lang-zh" onclick="handleLangChange('zh')">中文</button>
-          <button class="lang-btn" id="lang-es" onclick="handleLangChange('es')">Español</button>
-          <button class="lang-btn" id="lang-fr" onclick="handleLangChange('fr')">Français</button>
-          <button class="lang-btn" id="lang-de" onclick="handleLangChange('de')">Deutsch</button>
+      </div>
+      <div class="preview-items">
+        <div class="preview-item done">
+          <div class="preview-cb checked"></div>
+          <div class="preview-item-text">팀 미팅 준비</div>
+          <span class="preview-tag">완료</span>
         </div>
-
-        <button class="settings-save" id="settings-save-btn" onclick="saveSettings()">저장</button>
+        <div class="preview-item">
+          <div class="preview-cb"></div>
+          <div class="preview-item-text">기획서 초안 작성</div>
+          <span class="preview-tag">오늘</span>
+        </div>
+        <div class="preview-item">
+          <div class="preview-cb"></div>
+          <div class="preview-item-text">인보이스 검토</div>
+          <span class="preview-tag overdue">기한 초과</span>
+        </div>
       </div>
     </div>
-  </div>
+  </section>
 
-  <script src="js/firebase-config.js"></script>
-  <script src="js/settings.js"></script>
-  <script src="js/app.js"></script>
-  <script src="js/auth.js"></script>
+  <!-- 기능 -->
+  <section class="features" id="features">
+    <p class="section-label">주요 기능</p>
+    <h2 class="section-title">필요한 건 <em>다 있어요</em></h2>
+    <p class="section-sub">복잡한 기능은 없어요. 할 일 관리에 꼭 필요한 것들만 담았습니다.</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">☁️</div>
+        <h3>실시간 동기화</h3>
+        <p>Google 계정 또는 이메일로 로그인하면 어떤 기기에서든 할 일 목록이 자동으로 동기화됩니다.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📅</div>
+        <h3>마감일 관리</h3>
+        <p>각 항목에 마감일을 설정하세요. 오늘, 기한 초과, 예정 항목을 한눈에 확인할 수 있습니다.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🌙</div>
+        <h3>다크 / 라이트 모드</h3>
+        <p>눈에 편한 다크 모드와 깔끔한 라이트 모드를 지원합니다. 언제든 설정에서 전환 가능해요.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🌍</div>
+        <h3>7개 언어 지원</h3>
+        <p>한국어, 영어, 일본어, 중국어, 스페인어, 프랑스어, 독일어를 지원합니다.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <h3>진행률 추적</h3>
+        <p>오늘 얼마나 완료했는지 진행률 바로 한눈에 확인하세요. 작은 성취감이 하루를 채웁니다.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔒</div>
+        <h3>안전한 보안</h3>
+        <p>이메일 인증, Firebase 보안 규칙, reCAPTCHA로 내 데이터를 안전하게 보호합니다.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 언어 -->
+  <section class="languages" id="languages">
+    <p class="section-label">다국어 지원</p>
+    <h2 class="section-title">전 세계 어디서든 <em>편하게</em></h2>
+    <div class="lang-chips">
+      <span class="lang-chip">🇰🇷 한국어</span>
+      <span class="lang-chip">🇺🇸 English</span>
+      <span class="lang-chip">🇯🇵 日本語</span>
+      <span class="lang-chip">🇨🇳 中文</span>
+      <span class="lang-chip">🇪🇸 Español</span>
+      <span class="lang-chip">🇫🇷 Français</span>
+      <span class="lang-chip">🇩🇪 Deutsch</span>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <h2>지금 바로<br /><em>시작해보세요</em></h2>
+    <p>무료로 사용할 수 있어요. 계정 하나로 모든 기기에서 동기화됩니다.</p>
+    <a href="MyTodo/" class="btn-primary">무료로 시작하기 →</a>
+  </section>
+
+  <!-- 푸터 -->
+  <footer>
+    <a href="/" class="footer-logo">Clear<em>ToDoDay</em></a>
+    <div class="footer-links">
+      <a href="#features">기능</a>
+      <a href="app/">앱 시작하기</a>
+      <a href="privacy.html">개인정보처리방침</a>
+      <a href="terms.html">이용약관</a>
+    </div>
+    <p class="footer-copy">© 2026 ClearToDoDay. All rights reserved.</p>
+  </footer>
 </body>
 
 </html>
