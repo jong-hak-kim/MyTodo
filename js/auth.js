@@ -60,6 +60,23 @@ function googleLogin() {
     .catch(e => showAuthError(firebaseErrMsg(e.code)));
 }
 
+function resetPassword() {
+  const email = document.getElementById('email-input').value.trim();
+  if (!email) { showAuthError('이메일을 입력하세요.'); return; }
+  auth.sendPasswordResetEmail(email)
+    .then(() => showAuthError('비밀번호 재설정 메일을 발송했습니다 📧'))
+    .catch(e => showAuthError(firebaseErrMsg(e.code)));
+}
+
+function resendVerification() {
+  const user = auth.currentUser;
+  if (user) {
+    user.sendEmailVerification()
+      .then(() => showAuthError('인증 메일을 재발송했습니다 📧'))
+      .catch(e => showAuthError(firebaseErrMsg(e.code)));
+  }
+}
+
 // ── 로그아웃 ──
 function logout() {
   if (typeof unsubscribeTodos === 'function') unsubscribeTodos();
