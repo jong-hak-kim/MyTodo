@@ -71,7 +71,19 @@ function resetPassword() {
   const now = Date.now();
   if (now - lastSentTime < COOLDOWN) {
     const left = Math.ceil((COOLDOWN - (now - lastSentTime)) / 1000);
-    showAuthError(`${left}초 후에 다시 시도해주세요.`);
+    const btn = document.getElementById('forgot-pw-btn');
+    btn.textContent = `${left}초 후 재시도`;
+    btn.disabled = true;
+    const timer = setInterval(() => {
+      const remaining = Math.ceil((COOLDOWN - (Date.now() - lastSentTime)) / 1000);
+      if (remaining <= 0) {
+        clearInterval(timer);
+        btn.textContent = '비밀번호 찾기';
+        btn.disabled = false;
+      } else {
+        btn.textContent = `${remaining}초 후 재시도`;
+      }
+    }, 1000);
     return;
   }
 
@@ -91,8 +103,18 @@ function resendVerification() {
 
   const now = Date.now();
   if (now - lastVerifySentTime < COOLDOWN) {
-    const left = Math.ceil((COOLDOWN - (now - lastVerifySentTime)) / 1000);
-    showAuthError(`${left}초 후에 다시 시도해주세요.`);
+    const btn = document.getElementById('resend-verify-btn');
+    btn.disabled = true;
+    const timer = setInterval(() => {
+      const remaining = Math.ceil((COOLDOWN - (Date.now() - lastVerifySentTime)) / 1000);
+      if (remaining <= 0) {
+        clearInterval(timer);
+        btn.textContent = '인증 메일 재발송';
+        btn.disabled = false;
+      } else {
+        btn.textContent = `${remaining}초 후 재시도`;
+      }
+    }, 1000);
     return;
   }
 
