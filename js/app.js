@@ -260,9 +260,11 @@ function showAuth() {
   document.getElementById('app-screen').style.display = 'none';
 }
 
-auth.onAuthStateChanged(user => {
+auth.onAuthStateChanged(async user => {
   if (user) {
-    showApp(user);
+    await user.reload();
+    const freshUser = auth.currentUser;
+    showApp(freshUser);
   } else {
     showAuth();
   }
