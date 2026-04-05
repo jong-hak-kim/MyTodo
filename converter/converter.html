@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>단위 변환기</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f5f4f0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+.app{width:380px;background:#fff;border-radius:24px;box-shadow:0 8px 40px rgba(0,0,0,0.08);padding:2rem}
+h1{font-size:18px;font-weight:500;color:#1a1a18;margin-bottom:1.5rem}
+.cats{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:1.5rem}
+.cat{padding:6px 14px;border-radius:50px;border:1px solid #e8e6df;background:#fff;font-size:13px;color:#666;cursor:pointer;transition:all 0.15s}
+.cat.active{background:#185FA5;color:#fff;border-color:#185FA5}
+.row{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.field{flex:1;display:flex;flex-direction:column;gap:4px}
+.field label{font-size:12px;color:#aaa89e}
+.field input{width:100%;padding:10px 12px;border:1px solid #e8e6df;border-radius:10px;font-size:18px;font-weight:300;color:#1a1a18;outline:none;background:#fafaf8;transition:border 0.15s}
+.field input:focus{border-color:#185FA5;background:#fff}
+.field select{width:100%;padding:8px 12px;border:1px solid #e8e6df;border-radius:10px;font-size:14px;color:#1a1a18;outline:none;background:#fafaf8;cursor:pointer}
+.swap{background:none;border:1px solid #e8e6df;border-radius:50%;width:36px;height:36px;cursor:pointer;font-size:18px;color:#666;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.15s;margin-top:20px}
+.swap:hover{background:#f0ede6;transform:rotate(180deg)}
+.formula{margin-top:1rem;padding:12px;background:#f5f4f0;border-radius:10px;font-size:12px;color:#888;text-align:center}
+@media(prefers-color-scheme:dark){
+  body{background:#1a1a18}
+  .app{background:#2c2c2a;box-shadow:0 8px 40px rgba(0,0,0,0.4)}
+  h1{color:#f0ede6}
+  .cat{background:#3a3a38;border-color:#3a3a38;color:#aaa89e}
+  .field input,.field select{background:#242422;border-color:#3a3a38;color:#f0ede6}
+  .field input:focus{background:#2c2c2a}
+  .swap{border-color:#3a3a38;color:#aaa89e}
+  .swap:hover{background:#3a3a38}
+  .formula{background:#242422;color:#666}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <h1>단위 변환기</h1>
+  <div class="cats" id="cats"></div>
+  <div class="row">
+    <div class="field">
+      <label>단위</label>
+      <select id="from-unit" onchange="convert('from')"></select>
+    </div>
+    <button class="swap" onclick="swapUnits()">⇄</button>
+    <div class="field">
+      <label>단위</label>
+      <select id="to-unit" onchange="convert('from')"></select>
+    </div>
+  </div>
+  <div class="row">
+    <div class="field">
+      <label>값</label>
+      <input type="number" id="from-val" value="1" oninput="convert('from')"/>
+    </div>
+    <div style="width:36px;flex-shrink:0;margin-top:20px"></div>
+    <div class="field">
+      <label>결과</label>
+      <input type="number" id="to-val" oninput="convert('to')"/>
+    </div>
+  </div>
+  <div class="formula" id="formula"></div>
+</div>
+<script>
+const cats={
+  '길이':{units:['km','m','cm','mm','마일','야드','피트','인치'],toBase:{km:1000,m:1,cm:0.01,mm:0.001,'마일':1609.344,'야드':0.9144,'피트':0.3048,'인치':0.0254}},
+  '무게':{units:['톤','kg','g','mg','파운드','온스'],toBase:{'톤':1000000,kg:1000,g:1,mg:0.001,'파운드':453.592,'온스':28.3495}},
+  '온도':{units:['°C','°F','K'],special:true},
+  '넓이':{units:['km²','m²','cm²','피트²','인치²','에이커','평'],toBase:{'km²':1e6,'m²':1,'cm²':0.0001,'피트²':0.092903,'인치²':0.00064516,'에이커':4046.86,'평':3.30579}},
+  '속도':{units:['m/s','km/h','mph','노트'],toBase:{'m/s':1,'km/h':1/3.6,'mph':0.44704,'노트':0.514444}},
+  '데이터':{units:['bit','Byte','KB','MB','GB','TB'],toBase:{bit:1,Byte:8,KB:8192,MB:8388608,GB:8589934592,TB:8796093022208}},
+};
+
+let curCat='길이';
+
+function buildCats(){
+  const el=document.getElementById('cats');
+  Object.keys(cats).forEach(c=>{
+    const b=document.createElement('button');
+    b.className='cat'+(c===curCat?' active':'');
+    b.textContent=c;
+    b.onclick=()=>{curCat=c;document.querySelectorAll('.cat').forEach(x=>x.classList.remove('active'));b.classList.add('active');buildUnits();convert('from');};
+    el.appendChild(b);
+  });
+}
+
+function buildUnits(){
+  const units=cats[curCat].units;
+  ['from-unit','to-unit'].forEach((id,i)=>{
+    const sel=document.getElementById(id);
+    sel.innerHTML='';
+    units.forEach((u,j)=>{const o=document.createElement('option');o.value=u;o.textContent=u;if(j===(i===0?0:1))o.selected=true;sel.appendChild(o);});
+  });
+}
+
+function convert(dir){
+  const cat=cats[curCat];
+  const fu=document.getElementById('from-unit').value;
+  const tu=document.getElementById('to-unit').value;
+  const fv=parseFloat(document.getElementById('from-val').value);
+  const tv=parseFloat(document.getElementById('to-val').value);
+  let result;
+  if(cat.special){
+    const v=dir==='from'?fv:tv;
+    const from=dir==='from'?fu:tu;
+    const to=dir==='from'?tu:fu;
+    result=convertTemp(v,from,to);
+    if(dir==='from')document.getElementById('to-val').value=fmt(result);
+    else document.getElementById('from-val').value=fmt(result);
+  }else{
+    if(dir==='from'){
+      const base=fv*cat.toBase[fu];
+      result=base/cat.toBase[tu];
+      document.getElementById('to-val').value=fmt(result);
+    }else{
+      const base=tv*cat.toBase[tu];
+      result=base/cat.toBase[fu];
+      document.getElementById('from-val').value=fmt(result);
+    }
+  }
+  document.getElementById('formula').textContent=`1 ${fu} = ${fmt(cat.special?convertTemp(1,fu,tu):cat.toBase[fu]/cat.toBase[tu])} ${tu}`;
+}
+
+function convertTemp(v,from,to){
+  let c;
+  if(from==='°C')c=v;
+  else if(from==='°F')c=(v-32)*5/9;
+  else c=v-273.15;
+  if(to==='°C')return c;
+  if(to==='°F')return c*9/5+32;
+  return c+273.15;
+}
+
+function fmt(n){
+  if(isNaN(n))return '';
+  if(Math.abs(n)>=1e9||Math.abs(n)<1e-6&&n!==0)return n.toExponential(4);
+  return parseFloat(n.toPrecision(8)).toString();
+}
+
+function swapUnits(){
+  const f=document.getElementById('from-unit'),t=document.getElementById('to-unit');
+  const fv=f.value,tv=t.value;
+  f.value=tv;t.value=fv;
+  convert('from');
+}
+
+buildCats();buildUnits();convert('from');
+</script>
+</body>
+</html>

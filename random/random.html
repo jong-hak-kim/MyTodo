@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>랜덤 뽑기</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f5f4f0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+.app{width:380px;background:#fff;border-radius:24px;box-shadow:0 8px 40px rgba(0,0,0,0.08);overflow:hidden}
+.tabs{display:flex;border-bottom:1px solid #e8e6df}
+.tab{flex:1;padding:14px;text-align:center;font-size:14px;font-weight:500;color:#aaa89e;cursor:pointer;border:none;background:none;transition:all 0.2s}
+.tab.active{color:#185FA5;border-bottom:2px solid #185FA5}
+.panel{display:none;padding:2rem}
+.panel.active{display:block}
+label{font-size:12px;color:#aaa89e;display:block;margin-bottom:4px}
+.row{display:flex;gap:10px;align-items:flex-end;margin-bottom:1rem}
+input[type=number],input[type=text]{width:100%;padding:10px 12px;border:1px solid #e8e6df;border-radius:10px;font-size:16px;color:#1a1a18;outline:none;background:#fafaf8}
+input:focus{border-color:#185FA5;background:#fff}
+.btn{width:100%;padding:14px;border-radius:12px;border:none;background:#185FA5;color:#fff;font-size:16px;font-weight:500;cursor:pointer;transition:all 0.15s;margin-top:4px}
+.btn:hover{background:#378ADD}
+.btn:active{transform:scale(0.98)}
+.result-box{margin-top:1.5rem;background:#f5f4f0;border-radius:14px;padding:1.5rem;text-align:center;min-height:80px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px}
+.big-num{font-size:56px;font-weight:300;color:#185FA5;line-height:1}
+.result-label{font-size:12px;color:#aaa89e}
+.history{margin-top:1rem;max-height:100px;overflow-y:auto;display:flex;flex-wrap:wrap;gap:6px}
+.hist-tag{padding:4px 10px;background:#e8f0fb;color:#185FA5;border-radius:50px;font-size:12px}
+.name-input-row{display:flex;gap:8px;margin-bottom:8px}
+.name-input-row input{flex:1}
+.add-btn{padding:10px 14px;border:1px solid #e8e6df;border-radius:10px;background:#fff;font-size:18px;cursor:pointer;color:#185FA5;transition:background 0.15s}
+.add-btn:hover{background:#f0ede6}
+.tags{display:flex;flex-wrap:wrap;gap:6px;min-height:36px;margin-bottom:1rem}
+.tag{padding:6px 12px;background:#f0ede6;border-radius:50px;font-size:13px;color:#444;display:flex;align-items:center;gap:6px;cursor:default}
+.tag button{background:none;border:none;color:#aaa;cursor:pointer;font-size:14px;line-height:1;padding:0}
+.teams-result{margin-top:1rem}
+.team-card{background:#f5f4f0;border-radius:12px;padding:1rem;margin-bottom:10px}
+.team-title{font-size:12px;font-weight:500;color:#185FA5;margin-bottom:8px}
+.team-members{display:flex;flex-wrap:wrap;gap:6px}
+.member{padding:4px 10px;background:#fff;border-radius:50px;font-size:13px;color:#444;border:1px solid #e8e6df}
+@media(prefers-color-scheme:dark){
+  body{background:#1a1a18}
+  .app{background:#2c2c2a;box-shadow:0 8px 40px rgba(0,0,0,0.4)}
+  .tabs{border-color:#3a3a38}
+  input[type=number],input[type=text]{background:#242422;border-color:#3a3a38;color:#f0ede6}
+  input:focus{background:#2c2c2a}
+  .result-box{background:#242422}
+  .tag{background:#3a3a38;color:#d0cdc6}
+  .hist-tag{background:#1a2a3a;color:#85B7EB}
+  .team-card{background:#242422}
+  .member{background:#3a3a38;border-color:#3a3a38;color:#d0cdc6}
+  .add-btn{background:#3a3a38;border-color:#3a3a38;color:#85B7EB}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('num')">숫자 뽑기</button>
+    <button class="tab" onclick="showTab('team')">팀 나누기</button>
+    <button class="tab" onclick="showTab('pick')">랜덤 선택</button>
+  </div>
+
+  <!-- 숫자 뽑기 -->
+  <div class="panel active" id="panel-num">
+    <div class="row">
+      <div style="flex:1"><label>최솟값</label><input type="number" id="n-min" value="1"/></div>
+      <div style="flex:1"><label>최댓값</label><input type="number" id="n-max" value="100"/></div>
+      <div><label>개수</label><input type="number" id="n-count" value="1" min="1" style="width:64px"/></div>
+    </div>
+    <button class="btn" onclick="pickNum()">뽑기!</button>
+    <div class="result-box" id="num-result"><span style="color:#aaa89e;font-size:14px">버튼을 누르세요</span></div>
+    <div class="history" id="num-history"></div>
+  </div>
+
+  <!-- 팀 나누기 -->
+  <div class="panel" id="panel-team">
+    <div class="name-input-row">
+      <input type="text" id="team-name-input" placeholder="이름 입력" onkeydown="if(event.key==='Enter')addName()"/>
+      <button class="add-btn" onclick="addName()">+</button>
+    </div>
+    <div class="tags" id="name-tags"></div>
+    <div class="row">
+      <div style="flex:1"><label>팀 수</label><input type="number" id="team-count" value="2" min="2"/></div>
+    </div>
+    <button class="btn" onclick="makeTeams()">팀 나누기!</button>
+    <div class="teams-result" id="teams-result"></div>
+  </div>
+
+  <!-- 랜덤 선택 -->
+  <div class="panel" id="panel-pick">
+    <div class="name-input-row">
+      <input type="text" id="pick-input" placeholder="항목 입력" onkeydown="if(event.key==='Enter')addItem()"/>
+      <button class="add-btn" onclick="addItem()">+</button>
+    </div>
+    <div class="tags" id="pick-tags"></div>
+    <button class="btn" onclick="pickItem()">선택!</button>
+    <div class="result-box" id="pick-result"><span style="color:#aaa89e;font-size:14px">항목을 추가하세요</span></div>
+  </div>
+</div>
+<script>
+function showTab(id){
+  document.querySelectorAll('.tab').forEach((t,i)=>{t.classList.toggle('active',['num','team','pick'][i]===id);});
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+}
+
+// 숫자 뽑기
+function pickNum(){
+  const min=parseInt(document.getElementById('n-min').value);
+  const max=parseInt(document.getElementById('n-max').value);
+  const count=parseInt(document.getElementById('n-count').value)||1;
+  if(min>=max){alert('최솟값이 최댓값보다 작아야 해요');return;}
+  const results=[];
+  const box=document.getElementById('num-result');
+  if(count===1){
+    const n=Math.floor(Math.random()*(max-min+1))+min;
+    results.push(n);
+    box.innerHTML=`<div class="big-num">${n}</div><div class="result-label">${min} ~ ${max} 중</div>`;
+  }else{
+    const pool=[];for(let i=min;i<=max;i++)pool.push(i);
+    for(let i=0;i<Math.min(count,pool.length);i++){const j=Math.floor(Math.random()*(pool.length-i))+i;[pool[i],pool[j]]=[pool[j],pool[i]];results.push(pool[i]);}
+    box.innerHTML=`<div style="font-size:28px;font-weight:300;color:#185FA5">${results.join(', ')}</div><div class="result-label">${count}개 뽑기</div>`;
+  }
+  const hist=document.getElementById('num-history');
+  const tag=document.createElement('span');tag.className='hist-tag';tag.textContent=results.join(', ');
+  hist.prepend(tag);
+  if(hist.children.length>20)hist.lastChild.remove();
+}
+
+// 팀 나누기
+let names=[];
+function addName(){
+  const inp=document.getElementById('team-name-input');
+  const v=inp.value.trim();if(!v)return;
+  names.push(v);inp.value='';renderNames();
+}
+function renderNames(){
+  const el=document.getElementById('name-tags');el.innerHTML='';
+  names.forEach((n,i)=>{
+    const t=document.createElement('div');t.className='tag';
+    t.innerHTML=`${n}<button onclick="removeName(${i})">×</button>`;
+    el.appendChild(t);
+  });
+}
+function removeName(i){names.splice(i,1);renderNames();}
+function makeTeams(){
+  if(names.length<2){alert('이름을 2명 이상 추가하세요');return;}
+  const tc=parseInt(document.getElementById('team-count').value)||2;
+  const shuffled=[...names].sort(()=>Math.random()-0.5);
+  const teams=Array.from({length:tc},()=>[]);
+  shuffled.forEach((n,i)=>teams[i%tc].push(n));
+  const el=document.getElementById('teams-result');el.innerHTML='';
+  const colors=['#185FA5','#0F6E56','#993C1D','#993556','#534AB7'];
+  teams.forEach((t,i)=>{
+    const card=document.createElement('div');card.className='team-card';
+    card.innerHTML=`<div class="team-title" style="color:${colors[i%colors.length]}">팀 ${i+1}</div><div class="team-members">${t.map(m=>`<span class="member">${m}</span>`).join('')}</div>`;
+    el.appendChild(card);
+  });
+}
+
+// 랜덤 선택
+let items=[];
+function addItem(){
+  const inp=document.getElementById('pick-input');
+  const v=inp.value.trim();if(!v)return;
+  items.push(v);inp.value='';renderItems();
+}
+function renderItems(){
+  const el=document.getElementById('pick-tags');el.innerHTML='';
+  items.forEach((n,i)=>{
+    const t=document.createElement('div');t.className='tag';
+    t.innerHTML=`${n}<button onclick="removeItem(${i})">×</button>`;
+    el.appendChild(t);
+  });
+}
+function removeItem(i){items.splice(i,1);renderItems();}
+function pickItem(){
+  if(!items.length){alert('항목을 추가하세요');return;}
+  const chosen=items[Math.floor(Math.random()*items.length)];
+  document.getElementById('pick-result').innerHTML=`<div style="font-size:36px;font-weight:400;color:#185FA5">${chosen}</div><div class="result-label">${items.length}개 중 선택</div>`;
+}
+</script>
+</body>
+</html>

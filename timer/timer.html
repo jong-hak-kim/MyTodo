@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>타이머 & 스톱워치</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f5f4f0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+.app{width:360px;background:#fff;border-radius:24px;box-shadow:0 8px 40px rgba(0,0,0,0.08);overflow:hidden}
+.tabs{display:flex;border-bottom:1px solid #e8e6df}
+.tab{flex:1;padding:16px;text-align:center;font-size:14px;font-weight:500;color:#aaa89e;cursor:pointer;border:none;background:none;transition:all 0.2s}
+.tab.active{color:#185FA5;border-bottom:2px solid #185FA5}
+.panel{display:none;padding:2.5rem 2rem}
+.panel.active{display:block}
+.time-display{text-align:center;font-size:64px;font-weight:300;color:#1a1a18;letter-spacing:-2px;margin-bottom:2rem;font-variant-numeric:tabular-nums}
+.time-display span{font-size:40px;color:#aaa89e}
+.btns{display:flex;gap:12px;justify-content:center}
+.btn{padding:12px 28px;border-radius:50px;border:none;cursor:pointer;font-size:15px;font-weight:500;transition:all 0.15s}
+.btn:active{transform:scale(0.96)}
+.btn.primary{background:#185FA5;color:#fff}
+.btn.primary:hover{background:#378ADD}
+.btn.secondary{background:#f0ede6;color:#444}
+.btn.secondary:hover{background:#e8e4da}
+.btn.danger{background:#E24B4A;color:#fff}
+.btn.danger:hover{background:#f05c5a}
+.laps{margin-top:1.5rem;max-height:180px;overflow-y:auto}
+.lap{display:flex;justify-content:space-between;padding:8px 4px;font-size:13px;border-bottom:1px solid #f0ede6;color:#666}
+.lap:last-child{border:none}
+.lap strong{color:#1a1a18}
+.timer-inputs{display:flex;gap:8px;justify-content:center;margin-bottom:2rem}
+.time-input{display:flex;flex-direction:column;align-items:center;gap:4px}
+.time-input input{width:72px;text-align:center;font-size:32px;font-weight:300;border:none;border-bottom:2px solid #e8e6df;background:none;color:#1a1a18;padding:4px 0;outline:none;font-variant-numeric:tabular-nums}
+.time-input input:focus{border-color:#185FA5}
+.time-input label{font-size:11px;color:#aaa89e;text-transform:uppercase;letter-spacing:0.5px}
+.sep{font-size:32px;font-weight:300;color:#aaa89e;padding-top:8px}
+.ring{position:relative;width:160px;height:160px;margin:0 auto 1.5rem}
+svg.ring-svg{transform:rotate(-90deg)}
+circle.track{fill:none;stroke:#f0ede6;stroke-width:8}
+circle.prog{fill:none;stroke:#185FA5;stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset 0.5s linear}
+.ring-label{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:300;color:#1a1a18;font-variant-numeric:tabular-nums}
+@media(prefers-color-scheme:dark){
+  body{background:#1a1a18}
+  .app{background:#2c2c2a;box-shadow:0 8px 40px rgba(0,0,0,0.4)}
+  .tabs{border-color:#3a3a38}
+  .time-display,.ring-label{color:#f0ede6}
+  .time-input input{color:#f0ede6;border-color:#3a3a38}
+  .btn.secondary{background:#3a3a38;color:#d0cdc6}
+  .lap{border-color:#3a3a38;color:#888}
+  .lap strong{color:#f0ede6}
+  circle.track{stroke:#3a3a38}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('stopwatch')">스톱워치</button>
+    <button class="tab" onclick="showTab('timer')">타이머</button>
+  </div>
+
+  <!-- 스톱워치 -->
+  <div class="panel active" id="panel-stopwatch">
+    <div class="time-display" id="sw-display">00:00<span>.00</span></div>
+    <div class="btns">
+      <button class="btn secondary" id="sw-lap" onclick="swLap()" disabled>랩</button>
+      <button class="btn primary" id="sw-start" onclick="swToggle()">시작</button>
+      <button class="btn secondary" id="sw-reset" onclick="swReset()" disabled>초기화</button>
+    </div>
+    <div class="laps" id="sw-laps"></div>
+  </div>
+
+  <!-- 타이머 -->
+  <div class="panel" id="panel-timer">
+    <div class="ring">
+      <svg class="ring-svg" width="160" height="160" viewBox="0 0 160 160">
+        <circle class="track" cx="80" cy="80" r="68"/>
+        <circle class="prog" id="ring-prog" cx="80" cy="80" r="68" stroke-dasharray="427.26" stroke-dashoffset="0"/>
+      </svg>
+      <div class="ring-label" id="timer-ring-label">00:00</div>
+    </div>
+    <div class="timer-inputs" id="timer-inputs">
+      <div class="time-input"><input type="number" id="t-h" min="0" max="99" value="0" placeholder="0"/><label>시간</label></div>
+      <div class="sep">:</div>
+      <div class="time-input"><input type="number" id="t-m" min="0" max="59" value="5" placeholder="0"/><label>분</label></div>
+      <div class="sep">:</div>
+      <div class="time-input"><input type="number" id="t-s" min="0" max="59" value="0" placeholder="0"/><label>초</label></div>
+    </div>
+    <div class="btns">
+      <button class="btn primary" id="timer-start" onclick="timerToggle()">시작</button>
+      <button class="btn secondary" id="timer-reset" onclick="timerReset()" disabled>초기화</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Stopwatch
+let swInterval=null,swMs=0,swRunning=false,lapCount=0;
+function swTick(){swMs+=10;document.getElementById('sw-display').innerHTML=fmtSW(swMs);}
+function fmtSW(ms){
+  let cs=Math.floor(ms/10)%100,s=Math.floor(ms/1000)%60,m=Math.floor(ms/60000);
+  return pad(m)+':'+pad(s)+'<span>.'+pad(cs)+'</span>';
+}
+function pad(n){return String(n).padStart(2,'0');}
+function swToggle(){
+  if(swRunning){clearInterval(swInterval);swRunning=false;
+    document.getElementById('sw-start').textContent='계속';
+    document.getElementById('sw-start').className='btn primary';
+  }else{swInterval=setInterval(swTick,10);swRunning=true;
+    document.getElementById('sw-start').textContent='정지';
+    document.getElementById('sw-start').className='btn danger';
+    document.getElementById('sw-lap').disabled=false;
+    document.getElementById('sw-reset').disabled=false;
+  }
+}
+function swLap(){
+  lapCount++;
+  const div=document.getElementById('sw-laps');
+  const row=document.createElement('div');row.className='lap';
+  row.innerHTML='<span>랩 '+lapCount+'</span><strong>'+document.getElementById('sw-display').textContent.replace('<span>','').replace('</span>','')+'</strong>';
+  div.prepend(row);
+}
+function swReset(){
+  clearInterval(swInterval);swRunning=false;swMs=0;lapCount=0;
+  document.getElementById('sw-display').innerHTML='00:00<span>.00</span>';
+  document.getElementById('sw-laps').innerHTML='';
+  document.getElementById('sw-start').textContent='시작';
+  document.getElementById('sw-start').className='btn primary';
+  document.getElementById('sw-lap').disabled=true;
+  document.getElementById('sw-reset').disabled=true;
+}
+
+// Timer
+let timerInterval=null,timerSec=0,timerTotal=0,timerRunning=false;
+const CIRC=427.26;
+function timerToggle(){
+  if(!timerRunning){
+    if(timerSec===0){
+      const h=parseInt(document.getElementById('t-h').value)||0;
+      const m=parseInt(document.getElementById('t-m').value)||0;
+      const s=parseInt(document.getElementById('t-s').value)||0;
+      timerTotal=h*3600+m*60+s;
+      if(timerTotal===0)return;
+      timerSec=timerTotal;
+    }
+    document.getElementById('timer-inputs').style.display='none';
+    timerInterval=setInterval(timerTick,1000);timerRunning=true;
+    document.getElementById('timer-start').textContent='일시정지';
+    document.getElementById('timer-start').className='btn danger';
+    document.getElementById('timer-reset').disabled=false;
+    updateRing();
+  }else{
+    clearInterval(timerInterval);timerRunning=false;
+    document.getElementById('timer-start').textContent='계속';
+    document.getElementById('timer-start').className='btn primary';
+  }
+}
+function timerTick(){
+  timerSec--;
+  updateRing();
+  if(timerSec<=0){
+    clearInterval(timerInterval);timerRunning=false;
+    document.getElementById('timer-start').textContent='시작';
+    document.getElementById('timer-start').className='btn primary';
+    document.getElementById('timer-ring-label').textContent='완료!';
+    document.getElementById('ring-prog').style.stroke='#E24B4A';
+    try{new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAA').play();}catch(e){}
+    alert('타이머 완료!');
+  }
+}
+function updateRing(){
+  const ratio=timerTotal>0?timerSec/timerTotal:0;
+  document.getElementById('ring-prog').style.strokeDashoffset=CIRC*(1-ratio);
+  const m=Math.floor(timerSec/60),s=timerSec%60;
+  const h=Math.floor(timerSec/3600);
+  document.getElementById('timer-ring-label').textContent=h>0?pad(h)+':'+pad(Math.floor((timerSec%3600)/60))+':'+pad(s):pad(m)+':'+pad(s);
+}
+function timerReset(){
+  clearInterval(timerInterval);timerRunning=false;timerSec=0;timerTotal=0;
+  document.getElementById('timer-inputs').style.display='flex';
+  document.getElementById('timer-ring-label').textContent='00:00';
+  document.getElementById('ring-prog').style.strokeDashoffset=0;
+  document.getElementById('ring-prog').style.stroke='#185FA5';
+  document.getElementById('timer-start').textContent='시작';
+  document.getElementById('timer-start').className='btn primary';
+  document.getElementById('timer-reset').disabled=true;
+}
+
+function showTab(id){
+  document.querySelectorAll('.tab').forEach((t,i)=>{t.classList.toggle('active',['stopwatch','timer'][i]===id);});
+  document.querySelectorAll('.panel').forEach(p=>{p.classList.remove('active');});
+  document.getElementById('panel-'+id).classList.add('active');
+}
+</script>
+</body>
+</html>

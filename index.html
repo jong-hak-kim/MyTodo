@@ -469,6 +469,73 @@
       color: var(--text2);
     }
 
+    /* 도구 섹션 */
+    .tools {
+      padding: 6rem 2rem;
+      position: relative;
+      z-index: 1;
+      border-top: 1px solid var(--border);
+    }
+
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .tool-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.2s, transform 0.2s;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .tool-card:hover {
+      border-color: var(--accent2);
+      transform: translateY(-3px);
+    }
+
+    .tool-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: rgba(201, 185, 122, 0.1);
+      border: 1px solid rgba(201, 185, 122, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    .tool-card h3 {
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    .tool-card p {
+      font-size: 13px;
+      color: var(--text2);
+      font-weight: 300;
+      line-height: 1.6;
+      flex: 1;
+    }
+
+    .tool-link {
+      font-size: 12px;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
     /* CTA 섹션 */
     .cta-section {
       padding: 8rem 2rem;
@@ -580,6 +647,7 @@
     <div class="nav-links">
       <a href="#features">기능</a>
       <a href="#languages">언어</a>
+      <a href="#tools">도구</a>
       <a href="privacy.html">개인정보처리방침</a>
       <a href="app/" class="nav-cta">시작하기 →</a>
     </div>
@@ -689,6 +757,39 @@
     </div>
   </section>
 
+  <!-- 도구 -->
+  <section class="tools" id="tools">
+    <p class="section-label">무료 도구</p>
+    <h2 class="section-title">일상에 도움되는 <em>도구들</em></h2>
+    <p class="section-sub">자주 쓰는 유틸리티를 모았어요. 설치 없이 바로 사용할 수 있어요.</p>
+    <div class="tools-grid">
+      <a href="/calculator" class="tool-card">
+        <div class="tool-icon">🧮</div>
+        <h3>계산기</h3>
+        <p>사칙연산부터 퍼센트 계산까지. 키보드 입력도 지원하는 심플한 계산기예요.</p>
+        <span class="tool-link">바로 사용하기 →</span>
+      </a>
+      <a href="/converter" class="tool-card">
+        <div class="tool-icon">📐</div>
+        <h3>단위 변환기</h3>
+        <p>길이, 무게, 온도, 속도, 데이터 등 6가지 카테고리의 단위를 빠르게 변환하세요.</p>
+        <span class="tool-link">바로 사용하기 →</span>
+      </a>
+      <a href="/timer" class="tool-card">
+        <div class="tool-icon">⏱</div>
+        <h3>타이머 & 스톱워치</h3>
+        <p>랩 기록을 지원하는 스톱워치와 원형 프로그레스 타이머를 한 곳에서 사용하세요.</p>
+        <span class="tool-link">바로 사용하기 →</span>
+      </a>
+      <a href="/random" class="tool-card">
+        <div class="tool-icon">🎲</div>
+        <h3>랜덤 뽑기</h3>
+        <p>숫자 뽑기, 팀 나누기, 항목 중 랜덤 선택까지. 결정이 어려울 때 사용해보세요.</p>
+        <span class="tool-link">바로 사용하기 →</span>
+      </a>
+    </div>
+  </section>
+
   <!-- CTA -->
   <section class="cta-section">
     <h2>지금 바로<br /><em>시작해보세요</em></h2>
@@ -701,6 +802,7 @@
     <a href="/" class="footer-logo">Clear<em>ToDoDay</em></a>
     <div class="footer-links">
       <a href="#features">기능</a>
+      <a href="#tools">도구</a>
       <a href="app/">앱 시작하기</a>
       <a href="privacy.html">개인정보처리방침</a>
       <a href="terms.html">이용약관</a>
